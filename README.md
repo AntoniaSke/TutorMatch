@@ -1,18 +1,52 @@
-# React + Vite
+# TutorMatch
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+TutorMatch is a web application project that aims to connect students with tutors through a simple and user-friendly platform.
 
-Currently, two official plugins are available:
+The goal of this project is educational: to practice and understand modern frontend development with React, without relying on tutorials, focusing on real-world UI and logic decisions.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🎯 Project Purpose
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+The main purpose of TutorMatch is:
+- to explore how a tutoring platform could work
+- to practice React fundamentals (components, state, routing)
+- to design a clean and intuitive user interface
+- to gradually build a real-world style application step by step
 
-Note: This will impact Vite dev & build performances.
+This project is still under active development.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## ✨ Features implemented so far
+
+- React project setup using **Vite**
+- Basic routing with **React Router**
+- Fixed navigation bar (Navbar)
+- Custom logo integration
+- Visitor-focused navbar UI
+- Hover-based dropdown menu for **Sign up**
+  - Sign up as Student
+  - Sign up as Tutor
+- Basic Home page layout
+- CSS styling with component-based structure
+
+---
+
+## 🛠 Tech Stack
+
+- React (JavaScript)
+- Vite
+- React Router
+- CSS (no UI frameworks)
+- Git & GitHub
+
+---
+
+## 🚀 Getting Started
+
+To run the project locally:
+
+```bash
+npm install
+npm run dev
