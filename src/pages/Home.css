@@ -1,0 +1,14 @@
+
+.home-container {
+    margin-top:150px;
+      text-align: center;
+      
+}
+.home-container h1 {
+  font-size: 3rem;
+ 
+}
+.home-container p {
+  font-size: 1.5rem;
+    margin-top: 15px;
+}
