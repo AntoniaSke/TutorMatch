@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import './Register.css';
+import { Link } from "react-router-dom";
+import "./Register.css";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import toast from "react-hot-toast";
 import { getErrorMessage } from "../ErrorMessage";
-
 
 function RegisterStudent() {
     const [name, setName] = useState("");
@@ -13,6 +13,8 @@ function RegisterStudent() {
     const [password, setPassword] = useState("");
     const [gradeLevel, setGradeLevel] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [isParentGuardian, setIsParentGuardian] = useState(false);
+
     const handleSignup = async (e) => {
         e.preventDefault();
 
@@ -34,50 +36,120 @@ function RegisterStudent() {
                 name,
                 email,
                 gradeLevel,
+                isParentGuardian,
                 role: "student",
                 createdAt: serverTimestamp(),
             });
 
-            toast.success("Student created!");
-
+            toast.success("Student account created!");
+            setTimeout(() => {
+                navigate("/student-dashboard");
+            }, 1200);
         } catch (error) {
             toast.error(getErrorMessage(error));
         }
     };
 
     return (
-        <div className="register-container">
-            <h1>Student Signup Page</h1>
+        <section className="register-page">
+            <div className="register-card">
+                <div className="register-header">
+                    <span className="register-badge">Student account</span>
+                    <h1>Create your student account</h1>
+                    <p>Join TutorMatch and start finding the right tutor for your goals.</p>
+                </div>
 
-            <form className="register-form" onSubmit={handleSignup}>
-                <label htmlFor="name">Name:</label>
-                <input type="text" value={name} placeholder="Enter your full name" onChange={(e) => setName(e.target.value)} required />
+                <form className="register-form" onSubmit={handleSignup}>
+                    <div className="input-group">
+                        <label htmlFor="student-name">Full name</label>
+                        <input
+                            id="student-name"
+                            type="text"
+                            value={name}
+                            placeholder="Enter your full name"
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <label htmlFor="email">Email:</label>
-                <input type="email" value={email} placeholder="Enter your email" onChange={(e) => setEmail(e.target.value)} required />
+                    <div className="input-group">
+                        <label htmlFor="student-email">Email</label>
+                        <input
+                            id="student-email"
+                            type="email"
+                            value={email}
+                            placeholder="Enter your email"
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <label htmlFor="password">Password:</label>
-                <input type="password" id="password" name="password" value={password} minLength={8} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required />
+                    <div className="input-row">
+                        <div className="input-group">
+                            <label htmlFor="student-password">Password</label>
+                            <input
+                                id="student-password"
+                                type="password"
+                                minLength={8}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter your password"
+                                required
+                            />
+                        </div>
 
-                <label htmlFor="confirm-password">Confirm Password:</label>
-                <input type="password" id="confirm-password" name="confirm-password" minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm your password" required />
+                        <div className="input-group">
+                            <label htmlFor="student-confirm-password">Confirm password</label>
+                            <input
+                                id="student-confirm-password"
+                                type="password"
+                                minLength={8}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Confirm your password"
+                                required
+                            />
+                        </div>
+                    </div>
 
-                <label htmlFor="grade-level">Select a grade level:</label>
-                <select id="grade-level" name="grade-level" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} required>
-                    <option value="" disabled>Select grade level</option>
-                    <option value="elementary">Elementary</option>
-                    <option value="highschool">High School</option>
-                    <option value="college">College</option>
-                </select>
-                <br></br>
-                <label className="checkbox-row" htmlFor="terms">
-                    <input type="checkbox" id="terms" name="terms" />
-                    <span>I’m a parent/guardian creating this account</span>
-                </label>
+                    <div className="input-group">
+                        <label htmlFor="grade-level">Grade level</label>
+                        <select
+                            id="grade-level"
+                            value={gradeLevel}
+                            onChange={(e) => setGradeLevel(e.target.value)}
+                            required
+                        >
+                            <option value="">Select grade level</option>
+                            <option value="elementary">Elementary</option>
+                            <option value="highschool">High School</option>
+                            <option value="college">College</option>
+                        </select>
+                    </div>
 
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
+                    <label className="checkbox-row" htmlFor="terms">
+                        <input
+                            type="checkbox"
+                            id="terms"
+                            checked={isParentGuardian}
+                            onChange={(e) => setIsParentGuardian(e.target.checked)}
+                        />
+                        <span>I’m a parent/guardian creating this account</span>
+                    </label>
+
+                    <button type="submit" className="register-button">
+                        Create Student Account
+                    </button>
+                </form>
+
+                <div className="register-footer">
+                    <p>Already have an account?</p>
+                    <Link to="/login" className="register-footer-link">
+                        Log in
+                    </Link>
+                </div>
+            </div>
+        </section>
     );
 }
 
@@ -90,12 +162,19 @@ function RegisterTutor() {
 
     const handleSignup = async (e) => {
         e.preventDefault();
+
         if (password !== confirmPassword) {
             toast.error("Passwords do not match!");
             return;
         }
+
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
             const user = userCredential.user;
 
             await setDoc(doc(db, "users", user.uid), {
@@ -106,47 +185,107 @@ function RegisterTutor() {
                 createdAt: serverTimestamp(),
             });
 
-            toast.success("Tutor created!");
+            toast.success("Tutor account created!");
+            setTimeout(() => {
+                navigate("/student-dashboard");
+            }, 1200);
         } catch (error) {
             toast.error(getErrorMessage(error));
         }
     };
 
-
     return (
-        <div className="register-container">
-            <h1>Tutor Signup Page</h1>
+        <section className="register-page">
+            <div className="register-card">
+                <div className="register-header">
+                    <span className="register-badge">Tutor account</span>
+                    <h1>Create your tutor account</h1>
+                    <p>Set up your profile and start connecting with students.</p>
+                </div>
 
-            <form className="register-form" onSubmit={handleSignup}>
-                <label htmlFor="name">Name:</label>
-                <input type="text" value={name} placeholder="Enter your full name" onChange={(e) => setName(e.target.value)} required />
+                <form className="register-form" onSubmit={handleSignup}>
+                    <div className="input-group">
+                        <label htmlFor="tutor-name">Full name</label>
+                        <input
+                            id="tutor-name"
+                            type="text"
+                            value={name}
+                            placeholder="Enter your full name"
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <label htmlFor="email">Email:</label>
-                <input type="email" value={email} placeholder="Enter your email" onChange={(e) => setEmail(e.target.value)} required />
+                    <div className="input-group">
+                        <label htmlFor="tutor-email">Email</label>
+                        <input
+                            id="tutor-email"
+                            type="email"
+                            value={email}
+                            placeholder="Enter your email"
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <label htmlFor="password">Password:</label>
-                <input type="password" id="password" name="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required />
+                    <div className="input-row">
+                        <div className="input-group">
+                            <label htmlFor="tutor-password">Password</label>
+                            <input
+                                id="tutor-password"
+                                type="password"
+                                minLength={8}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter your password"
+                                required
+                            />
+                        </div>
 
-                <label htmlFor="confirm-password">Confirm Password:</label>
-                <input type="password" id="confirm-password" name="confirm-password" minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm your password" required />
+                        <div className="input-group">
+                            <label htmlFor="tutor-confirm-password">Confirm password</label>
+                            <input
+                                id="tutor-confirm-password"
+                                type="password"
+                                minLength={8}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Confirm your password"
+                                required
+                            />
+                        </div>
+                    </div>
 
-                <label htmlFor="subjects">Subjects you can tutor:</label>
-                <select id="subjects" name="subjects" value={subjects} onChange={(e) => setSubjects(e.target.value)} required>
-                    <option value="" disabled>Select subject</option>
+                    <div className="input-group">
+                        <label htmlFor="subjects">Subject you can tutor</label>
+                        <select
+                            id="subjects"
+                            value={subjects}
+                            onChange={(e) => setSubjects(e.target.value)}
+                            required
+                        >
+                            <option value="">Select subject</option>
+                            <option value="math">Math</option>
+                            <option value="science">Science</option>
+                            <option value="language">Language</option>
+                            <option value="history">History</option>
+                        </select>
+                    </div>
 
-                    <option value="math">Math</option>
-                    <option value="science">Science</option>
-                    <option value="language">Language</option>
-                    <option value="history">History</option>
-                </select>
+                    <button type="submit" className="register-button">
+                        Create Tutor Account
+                    </button>
+                </form>
 
-
-                <br></br>
-
-
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
+                <div className="register-footer">
+                    <p>Already have an account?</p>
+                    <Link to="/login" className="register-footer-link">
+                        Log in
+                    </Link>
+                </div>
+            </div>
+        </section>
     );
 }
+
 export { RegisterStudent, RegisterTutor };
