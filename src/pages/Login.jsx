@@ -29,9 +29,11 @@ export default function Login() {
         const userData = userDoc.data();
 
         if (userData.role === "student") {
+            
           navigate("/student-dashboard");
         } else if (userData.role === "tutor") {
-          navigate("/tutor-dashboard");
+ console.log("Navigating to tutor dashboard");
+            navigate("/tutor-dashboard");
         }
       }
     } catch (error) {

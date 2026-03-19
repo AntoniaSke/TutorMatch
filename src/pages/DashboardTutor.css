@@ -1,0 +1,46 @@
+h1{
+    font-size:50px;
+    color: #004aad;
+    
+
+}
+.dashboard-container {
+  padding-top: 120px; /* αντί για margin παντού */
+  padding-left: 20px;
+  padding-right: 20px;
+    background:
+    linear-gradient(rgba(241, 245, 252, 0.92), rgba(241, 245, 252, 0.92)),
+    url("../assets/teaching.png") center/cover no-repeat;
+height: 100%;
+}
+.dashboard-tabs {
+  margin-top: 30px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  
+}
+
+.dashboard-tab {
+  padding: 10px 16px;
+  border: none;
+  background: #f1f5fc;
+  color: #243247;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+   transition: all 0.2s ease;
+}
+
+/* hover */
+.dashboard-tab:hover {
+  background: #004aad;
+  color: white;
+}
+
+/* ACTIVE TAB 🔥 */
+.dashboard-tab.active {
+  background: #004aad;
+  color: white;
+}
