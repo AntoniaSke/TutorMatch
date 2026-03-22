@@ -1,12 +1,67 @@
-import { Link, NavLink } from 'react-router-dom';
-import React, { useState } from 'react';
-import logo from '../assets/logo.png';
-import './Navbar.css';
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import logo from "../assets/logo.png";
+import "./Navbar.css";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSignupOpen, setIsMobileSignupOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
+const navigate = useNavigate();
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setLoggedIn(true);
+
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setRole(userData.role || null);
+          } else {
+            setRole(null);
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setRole(null);
+        }
+      } else {
+        setLoggedIn(false);
+        setRole(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setIsMobileMenuOpen(false);
+      setIsDropdownOpen(false);
+      setIsMobileSignupOpen(false);
+      toast.success("Signed out successfully.");
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Failed to sign out.");
+    }
+  };
+
+  const dashboardPath =
+    role === "student"
+      ? "/student-dashboard"
+      : role === "tutor"
+      ? "/tutor-dashboard"
+      : "/";
 
   return (
     <nav className="navbar">
@@ -36,34 +91,48 @@ function Navbar() {
         </div>
 
         <div className="navbar-actions">
-          <NavLink to="/login" className="login-btn">
-            Log in
-          </NavLink>
+          {loggedIn ? (
+            <>
+              <Link to={dashboardPath} className="dashboard-link">
+                Dashboard
+              </Link>
 
-          <div
-            className="dropdown"
-            onMouseEnter={() => setIsDropdownOpen(true)}
-            onMouseLeave={() => setIsDropdownOpen(false)}
-          >
-            <button
-              className="signup-btn"
-              type="button"
-              onClick={() => setIsDropdownOpen((prev) => !prev)}
-            >
-              Sign up <span className="arrow">▼</span>
-            </button>
+              <button type="button" className="logout-btn" onClick={handleSignOut}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="login-btn">
+                Log in
+              </Link>
 
-            {isDropdownOpen && (
-              <ul className="dropdown-menu">
-                <li>
-                  <Link to="/signup/student">As Student</Link>
-                </li>
-                <li>
-                  <Link to="/signup/tutor">As Tutor</Link>
-                </li>
-              </ul>
-            )}
-          </div>
+              <div
+                className="dropdown"
+                onMouseEnter={() => setIsDropdownOpen(true)}
+                onMouseLeave={() => setIsDropdownOpen(false)}
+              >
+                <button
+                  className="signup-btn"
+                  type="button"
+                  onClick={() => setIsDropdownOpen((prev) => !prev)}
+                >
+                  Sign up <span className="arrow">▼</span>
+                </button>
+
+                {isDropdownOpen && (
+                  <ul className="dropdown-menu">
+                    <li>
+                      <Link to="/signup/student">As Student</Link>
+                    </li>
+                    <li>
+                      <Link to="/signup/tutor">As Tutor</Link>
+                    </li>
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         <button
@@ -101,46 +170,68 @@ function Navbar() {
             How it works
           </NavLink>
 
-          <NavLink
-            to="/login"
-            className="mobile-link"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Log in
-          </NavLink>
-
-          <button
-            className="mobile-signup-toggle"
-            type="button"
-            onClick={() => setIsMobileSignupOpen((prev) => !prev)}
-          >
-            Sign up <span className="arrow">▼</span>
-          </button>
-
-          {isMobileSignupOpen && (
-            <div className="mobile-signup-links">
-              <Link
-                to="/signup/student"
-                className="mobile-sublink"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsMobileSignupOpen(false);
-                }}
+          {loggedIn ? (
+            <>
+              <NavLink
+                to={dashboardPath}
+                className="mobile-link"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                As Student
-              </Link>
+                Dashboard
+              </NavLink>
 
-              <Link
-                to="/signup/tutor"
-                className="mobile-sublink"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsMobileSignupOpen(false);
-                }}
+              <button
+                type="button"
+                className="mobile-signout-btn"
+                onClick={handleSignOut}
               >
-                As Tutor
-              </Link>
-            </div>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink
+                to="/login"
+                className="mobile-link"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Log in
+              </NavLink>
+
+              <button
+                className="mobile-signup-toggle"
+                type="button"
+                onClick={() => setIsMobileSignupOpen((prev) => !prev)}
+              >
+                Sign up <span className="arrow">▼</span>
+              </button>
+
+              {isMobileSignupOpen && (
+                <div className="mobile-signup-links">
+                  <Link
+                    to="/signup/student"
+                    className="mobile-sublink"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsMobileSignupOpen(false);
+                    }}
+                  >
+                    As Student
+                  </Link>
+
+                  <Link
+                    to="/signup/tutor"
+                    className="mobile-sublink"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsMobileSignupOpen(false);
+                    }}
+                  >
+                    As Tutor
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

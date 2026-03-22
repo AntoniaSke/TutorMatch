@@ -148,6 +148,34 @@
   background: #f3f7ff;
   color: #004aad;
 }
+.logout-btn {
+  border: none;
+  background: transparent;
+  color: #1f2937;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.dashboard-link {
+  border: none;
+  background: #004aad;
+  color: #f3f7ff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.6s ease;
+  text-decoration:none
+}
+.logout-btn:hover,
+.dashboard-link:hover {
+  background: #f3f7ff;
+  color: #004aad;
+}
 
 .mobile-menu-btn {
   display: none;
