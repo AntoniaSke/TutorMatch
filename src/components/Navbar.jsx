@@ -78,7 +78,7 @@ const navigate = useNavigate();
               </NavLink>
             </li>
             <li>
-              <NavLink to="/tutors" className="nav-link">
+              <NavLink to="/find-tutors" className="nav-link">
                 Find Tutors
               </NavLink>
             </li>
@@ -155,7 +155,7 @@ const navigate = useNavigate();
           </NavLink>
 
           <NavLink
-            to="/tutors"
+            to="/find-tutors"
             className="mobile-link"
             onClick={() => setIsMobileMenuOpen(false)}
           >

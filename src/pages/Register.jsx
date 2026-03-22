@@ -36,7 +36,7 @@ function RegisterStudent() {
                 name,
                 email,
                 gradeLevel,
-                isParentGuardian,
+              
                 role: "student",
                 createdAt: serverTimestamp(),
             });
@@ -135,15 +135,7 @@ function RegisterStudent() {
                         </select>
                     </div>
 
-                    <label className="checkbox-row" htmlFor="terms">
-                        <input
-                            type="checkbox"
-                            id="terms"
-                            checked={isParentGuardian}
-                            onChange={(e) => setIsParentGuardian(e.target.checked)}
-                        />
-                        <span>I’m a parent/guardian creating this account</span>
-                    </label>
+                  
 
                     <button type="submit" className="register-button">
                         Create Student Account
@@ -188,7 +180,7 @@ function RegisterTutor() {
             await setDoc(doc(db, "users", user.uid), {
                 name,
                 email,
-                subjects,
+                
                 role: "tutor",
                 createdAt: serverTimestamp(),
             });
@@ -264,21 +256,7 @@ function RegisterTutor() {
                         </div>
                     </div>
 
-                    <div className="input-group">
-                        <label htmlFor="subjects">Subject you can tutor</label>
-                        <select
-                            id="subjects"
-                            value={subjects}
-                            onChange={(e) => setSubjects(e.target.value)}
-                            required
-                        >
-                            <option value="">Select subject</option>
-                            <option value="math">Math</option>
-                            <option value="science">Science</option>
-                            <option value="language">Language</option>
-                            <option value="history">History</option>
-                        </select>
-                    </div>
+                   
 
                     <button type="submit" className="register-button">
                         Create Tutor Account
