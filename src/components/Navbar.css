@@ -271,4 +271,15 @@
     color: #004aad;
     background: #f3f7ff;
   }
+  .mobile-signout-btn {
+    border: none;
+   background: #004aad;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
 }

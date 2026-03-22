@@ -78,8 +78,8 @@
 .register-form input,
 .register-form select {
   width: 80%;
-  height: 52px;
-  padding: 0 16px;
+  height: 38px;
+  padding: 0 6px;
   border: 1px solid #d4ddeb;
   border-radius: 14px;
   font-size: 1rem;
@@ -179,7 +179,7 @@
   .register-form input,
   .register-form select,
   .register-button {
-    height: 48px;
+    height: 40px;
   }
 
   .checkbox-row {

@@ -40,11 +40,19 @@ function RegisterStudent() {
                 role: "student",
                 createdAt: serverTimestamp(),
             });
-
-            toast.success("Student account created!");
+            if(user.role === "student") {
+                 toast.success("Student account created!");
             setTimeout(() => {
                 navigate("/student-dashboard");
             }, 1200);
+
+            }else{
+                    toast.success("Tutor account created!");
+            setTimeout(() => {
+                navigate("/tutor-dashboard");
+            }, 1200);
+        }
+           
         } catch (error) {
             toast.error(getErrorMessage(error));
         }

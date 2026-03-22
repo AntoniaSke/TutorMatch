@@ -205,6 +205,8 @@
 
   .login-form input,
   .login-button {
-    height: 48px;
+    height: 38px;
+    width:95%;
+
   }
 }

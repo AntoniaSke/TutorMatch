@@ -7,7 +7,7 @@ import Home from './pages/Home.jsx';
 import { RegisterStudent, RegisterTutor } from './pages/Register.jsx';
 import { Toaster } from "react-hot-toast";
 import Login from './pages/Login.jsx';
-import TutorDashboard from './pages/DashboardTutor.jsx';
+import { TutorDashboard, StudentDashboard } from './pages/Dashboard.jsx';
 function App() {
  
 
@@ -51,6 +51,7 @@ function App() {
         <Route path="/login" element={<Login />} />
          
           <Route path="/tutor-dashboard" element={<TutorDashboard />} /> 
+          <Route path="/student-dashboard" element={<StudentDashboard />} />
     </Routes>
    
     </>
