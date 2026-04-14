@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import "./FindTutors.css";
-
+import { useSearchParams } from "react-router-dom";
 
 export default function FindTutors() {
     const subjects = [
@@ -32,34 +32,59 @@ export default function FindTutors() {
     const [selectedTutor, setSelectedTutor] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [filteredTutors, setFilteredTutors] = useState([]);
-    const [selectedSubjects, setSelectedSubjects] = useState([]);
-    const [isSubjectOpen, setIsSubjectOpen] = useState(false);
-    const [selectedLevel, setSelectedLevel] = useState("");
 
-    useEffect(() => {
-        const fetchTutors = async () => {
-            try {
-                const q = query(
-                    collection(db, "users"),
-                    where("role", "==", "tutor")
-                );
+    const [searchParams] = useSearchParams();
 
-                const querySnapshot = await getDocs(q);
+const initialSubject = searchParams.get("subject") || "";
+const initialLevel = searchParams.get("level") || "";
 
-                const tutorsList = querySnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
+const [selectedSubjects, setSelectedSubjects] = useState(
+  initialSubject ? [initialSubject] : []
+);
+const [isSubjectOpen, setIsSubjectOpen] = useState(false);
+const [selectedLevel, setSelectedLevel] = useState(initialLevel);
 
-                setTutors(tutorsList);
-                setFilteredTutors(tutorsList);
-            } catch (error) {
-                console.error("Error fetching tutors:", error);
-            }
-        };
+   useEffect(() => {
+  const fetchTutors = async () => {
+    try {
+      const q = query(
+        collection(db, "users"),
+        where("role", "==", "tutor")
+      );
 
-        fetchTutors();
-    }, []);
+      const querySnapshot = await getDocs(q);
+
+      const tutorsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setTutors(tutorsList);
+
+      let results = tutorsList;
+
+      if (initialSubject) {
+        results = results.filter(
+          (tutor) =>
+            Array.isArray(tutor.subjects) &&
+            tutor.subjects.includes(initialSubject)
+        );
+      }
+
+      if (initialLevel) {
+        results = results.filter(
+          (tutor) => tutor.teachingLevel === initialLevel
+        );
+      }
+
+      setFilteredTutors(results);
+    } catch (error) {
+      console.error("Error fetching tutors:", error);
+    }
+  };
+
+  fetchTutors();
+}, [initialSubject, initialLevel]);
 
     const handleSubjectToggle = (subject) => {
         setSelectedSubjects((prev) =>
@@ -121,7 +146,7 @@ export default function FindTutors() {
                                         <label key={subject} className="multiselect-option">
                                             <input
                                                 type="checkbox"
-                                                checked={selectedSubjects.includes(subject)}
+                                                checked={selectedSubjects.includes(subject) || subject === selectedSubjects}
                                                 onChange={() => handleSubjectToggle(subject)}
                                             />
                                             <span>{subject}</span>
@@ -133,26 +158,26 @@ export default function FindTutors() {
                     </div>
 
                     <div className="form-group">
-  <label htmlFor="level">Level</label>
+                        <label htmlFor="level">Level</label>
 
-  <div className="select-wrapper">
-    <select
-      id="level"
-      className="find-level-select"
-      value={selectedLevel}
-      onChange={(e) => setSelectedLevel(e.target.value)}
-    >
-      <option value="">Select a level</option>
-      {levels.map((level) => (
-        <option key={level} value={level}>
-          {level}
-        </option>
-      ))}
-    </select>
+                        <div className="select-wrapper">
+                            <select
+                                id="level"
+                                className="find-level-select"
+                                value={selectedLevel}
+                                onChange={(e) => setSelectedLevel(e.target.value)}
+                            >
+                                <option value="">Select a level</option>
+                                {levels.map((level) => (
+                                    <option key={level} value={level}>
+                                        {level}
+                                    </option>
+                                ))}
+                            </select>
 
-    <span className="select-arrow">⌄</span>
-  </div>
-</div>
+                            <span className="select-arrow">⌄</span>
+                        </div>
+                    </div>
 
                     <button className="search-button" onClick={handleSearch}>Search Tutors</button>
                 </div>

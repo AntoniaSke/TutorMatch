@@ -5,7 +5,7 @@
     background:
     linear-gradient(rgba(241, 245, 252, 0.92), rgba(241, 245, 252, 0.92)),
     url("../assets/teaching.png") center/cover no-repeat;
-height: 100%;
+height: 100vh;
 padding-bottom:20px;
 }
 
@@ -134,14 +134,15 @@ padding-bottom:20px;
   width: 100%;
   min-height: 50px;
   padding: 0 14px;
-  border: 1px solid #cbd5e1;
+  border: none;
   border-radius: 14px;
-  background: #f8fafc;
+  background: white;
   color: #0f172a;
   font-size: 0.95rem;
   text-align: left;
   cursor: pointer;
 }
+
 
 .multiselect-dropdown {
   position: absolute;
@@ -189,15 +190,15 @@ padding-bottom:20px;
 
 .tutors-grid {
   display: grid;
-  grid-template-columns: repeat(4, 260px);
+  grid-template-columns: repeat(4, minmax(0, 260px));
   justify-content: center;
   gap: 24px;
   margin-top: 24px;
 }
 
 .tutor-card {
-  width: 220px;
-min-height:100px;
+  width: 100%;
+  min-height: 100px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   border: 1px solid #e2e8f0;
   border-radius: 20px;
@@ -205,6 +206,7 @@ min-height:100px;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
   transition: all 0.25s ease;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .tutor-card:hover {
@@ -262,11 +264,16 @@ min-height:100px;
   .find-card {
     padding: 24px;
   }
+
+  .tutors-grid {
+    grid-template-columns: repeat(2, minmax(0, 260px));
+    gap: 20px;
+  }
 }
 
 @media (max-width: 600px) {
   .find-tutors-container {
-    padding: 28px 16px;
+    padding: 96px 16px 20px;
   }
 
   .find-tutors-container h1 {
@@ -278,8 +285,19 @@ min-height:100px;
     padding: 20px;
   }
 
+  .tutors-grid {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+    gap: 16px;
+  }
+
   .tutor-card {
+    max-width: 100%;
     padding: 18px;
+  }
+
+  .tutor-container > p {
+    padding: 0 8px;
   }
 }
 
