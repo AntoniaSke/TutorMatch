@@ -22,6 +22,7 @@ import {
     subscribeToTutorReviews,
     calculateAverageRating,
 } from "../services/reviewService";
+import defaultAvatar from "../assets/profile-avatar.png";
 
 export default function FindTutors() {
     const subjects = [
@@ -349,7 +350,7 @@ export default function FindTutors() {
                         filteredTutors.map((tutor) => (
                             <div key={tutor.id} className="tutor-card">
                                 <img
-                                    src={tutor.photoURL || "/default-profile.png"}
+                                    src={tutor.photoURL || defaultAvatar}
                                     alt={tutor.name}
                                     className="thumbnail"
                                 />
