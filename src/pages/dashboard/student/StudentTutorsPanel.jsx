@@ -7,6 +7,8 @@ import LeaveReviewModal from "../../../components/LeaveReviewModal";
 import {
   createReview,
   getExistingReviewForSession,
+  subscribeToTutorReviews,
+  calculateAverageRating,
 } from "../../../services/reviewService";
 import toast from "react-hot-toast";
 import "./StudentTutorsPanel.css";
@@ -18,9 +20,11 @@ export default function StudentTutorsPanel({ requests, sessions }) {
 
   const [selectedReviewTarget, setSelectedReviewTarget] = useState(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-
+  const [selectedTutorReviews, setSelectedTutorReviews] = useState([]);
   const acceptedRequests = useMemo(() => {
-    const accepted = requests.filter((request) => request.status === "accepted");
+    const accepted = requests.filter(
+      (request) => request.status === "accepted",
+    );
 
     const map = new Map();
 
@@ -57,7 +61,7 @@ export default function StudentTutorsPanel({ requests, sessions }) {
             if (tutorSnap.exists()) {
               profiles[request.tutorId] = tutorSnap.data();
             }
-          })
+          }),
         );
 
         setTutorProfiles(profiles);
@@ -73,9 +77,32 @@ export default function StudentTutorsPanel({ requests, sessions }) {
     }
   }, [acceptedRequests]);
 
+  useEffect(() => {
+    let unsubscribeReviews = null;
+
+    if (selectedTutor?.id) {
+      unsubscribeReviews = subscribeToTutorReviews(
+        selectedTutor.id,
+        (reviews) => {
+          setSelectedTutorReviews(reviews);
+        },
+        (error) => {
+          console.error("Error fetching tutor reviews:", error);
+        },
+      );
+    } else {
+      setSelectedTutorReviews([]);
+    }
+
+    return () => {
+      if (unsubscribeReviews) unsubscribeReviews();
+    };
+  }, [selectedTutor]);
+
   const getCompletedSessionForTutor = (tutorId) => {
     return sessions.find(
-      (session) => session.tutorId === tutorId && session.status === "completed"
+      (session) =>
+        session.tutorId === tutorId && session.status === "completed",
     );
   };
 
@@ -147,7 +174,9 @@ export default function StudentTutorsPanel({ requests, sessions }) {
             const tutorHourlyRate =
               request.tutorHourlyRate || tutorProfile.hourlyRate || "-";
 
-            const completedSession = getCompletedSessionForTutor(request.tutorId);
+            const completedSession = getCompletedSessionForTutor(
+              request.tutorId,
+            );
 
             return (
               <div key={request.tutorId} className="student-tutor-card">
@@ -164,7 +193,8 @@ export default function StudentTutorsPanel({ requests, sessions }) {
 
                   <p>
                     <strong>Subjects:</strong>{" "}
-                    {Array.isArray(request.subjects) && request.subjects.length > 0
+                    {Array.isArray(request.subjects) &&
+                    request.subjects.length > 0
                       ? request.subjects.join(", ")
                       : request.subject}
                   </p>
@@ -185,14 +215,15 @@ export default function StudentTutorsPanel({ requests, sessions }) {
                     className="view-tutor-profile-button"
                     onClick={() => {
                       setSelectedTutor({
+                        id: request.tutorId,
                         name: request.tutorName,
                         photoURL: tutorPhoto,
                         bio: tutorProfile.bio || "",
-                        subjects: tutorProfile.subjects || request.subjects || [],
+                        subjects:
+                          tutorProfile.subjects || request.subjects || [],
                         teachingLevel: tutorTeachingLevel,
                         availability: tutorAvailability,
                         hourlyRate: tutorHourlyRate,
-                        rating: tutorProfile.rating || "",
                       });
                       setIsTutorModalOpen(true);
                     }}
@@ -207,7 +238,8 @@ export default function StudentTutorsPanel({ requests, sessions }) {
                         setSelectedReviewTarget({
                           tutorId: request.tutorId,
                           tutorName: request.tutorName,
-                          studentName: auth.currentUser?.displayName || "Student",
+                          studentName:
+                            auth.currentUser?.displayName || "Student",
                           sessionId: completedSession.id,
                         });
                         setIsReviewModalOpen(true);
@@ -228,8 +260,13 @@ export default function StudentTutorsPanel({ requests, sessions }) {
         onClose={() => {
           setIsTutorModalOpen(false);
           setSelectedTutor(null);
+          setSelectedTutorReviews([]);
         }}
-        tutor={selectedTutor}
+        tutor={{
+          ...selectedTutor,
+          rating: calculateAverageRating(selectedTutorReviews),
+        }}
+        reviews={selectedTutorReviews}
       />
 
       <LeaveReviewModal
