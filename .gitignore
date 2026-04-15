@@ -27,3 +27,7 @@ node_modules
 dist
 .env
 .DS_Store
+
+# admin secrets
+admin-scripts/serviceAccountKey.json
+admin-scripts/*.json

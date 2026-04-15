@@ -252,6 +252,21 @@ padding-bottom:20px;
   background: #dbeafe;
 }
 
+.request-textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 12px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.request-textarea:focus {
+  border-color: #004aad;
+  box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.12);
+}
 @media (max-width: 900px) {
   .find-search-form {
     grid-template-columns: 1fr;

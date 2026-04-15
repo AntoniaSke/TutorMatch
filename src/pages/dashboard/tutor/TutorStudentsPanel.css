@@ -1,0 +1,87 @@
+.tutor-students-panel {
+  margin-top: 16px;
+}
+
+.tutor-students-header {
+  margin-bottom: 20px;
+}
+
+.tutor-students-header h2 {
+  margin-bottom: 6px;
+}
+
+.empty-students {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.tutor-students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.tutor-student-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.tutor-student-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.tutor-student-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #dbeafe;
+  flex-shrink: 0;
+}
+
+.tutor-student-info {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+.tutor-student-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+.tutor-student-info p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #374151;
+}
+
+.tutor-student-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.schedule-student-button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: #004aad;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.schedule-student-button:hover {
+  opacity: 0.92;
+}

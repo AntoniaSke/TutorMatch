@@ -1,0 +1,92 @@
+.student-tutors-panel {
+  margin-top: 16px;
+}
+
+.student-tutors-header {
+  margin-bottom: 20px;
+}
+
+.student-tutors-header h2 {
+  margin-bottom: 6px;
+}
+
+.student-tutors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  gap: 20px;
+}
+
+.student-tutor-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.student-tutor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.student-tutor-avatar-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.student-tutor-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 3px solid #e0e7ff; /* light blue border */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.student-tutor-body {
+  display: grid;
+  gap: 8px;
+}
+
+.student-tutor-body h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.student-tutor-body p {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.view-tutor-profile-button {
+  margin-top: 12px;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #004aad;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.view-tutor-profile-button:hover {
+  opacity: 0.92;
+}
+
+.leave-review-button {
+  margin-top: 10px;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #16a34a;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}

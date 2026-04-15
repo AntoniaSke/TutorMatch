@@ -1,46 +1,65 @@
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import React, { useState } from "react";
 import "./Login.css";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
-import { useNavigate } from "react-router-dom";
-
+import toast from "react-hot-toast";
+import { loginWithEmail, sendResetPasswordEmail } from "../services/authService";
+import { getUserProfile } from "../services/userService";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
 
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
+ const handleForgotPassword = async (email) => {
+  const cleanEmail = email.trim();
 
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+  if (!cleanEmail) {
+    toast.error("Please enter your email to reset password.");
+    return;
+  }
 
-      const user = userCredential.user;
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+  try {
+    await sendResetPasswordEmail(cleanEmail);
+    toast.success("Password reset email sent.");
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to send password reset email.");
+  }
+};
 
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
+ const handleLoginSubmit = async (e) => {
+  e.preventDefault();
 
-        if (userData.role === "student") {
-            
-          navigate("/student-dashboard");
-        } else if (userData.role === "tutor") {
- console.log("Navigating to tutor dashboard");
-            navigate("/tutor-dashboard");
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      alert(error.message);
+  try {
+    const userCredential = await loginWithEmail({ email, password });
+    const user = userCredential.user;
+
+    const userDoc = await getUserProfile(user.uid);
+
+    if (!userDoc.exists()) {
+        toast.error("User profile not found.");
+        return;
     }
-  };
+
+    const userData = userDoc.data();
+
+    if (userData.role === "student") {
+      navigate("/student-dashboard");
+    } else if (userData.role === "tutor") {
+      navigate("/tutor-dashboard");
+    } else {
+      toast.error("Invalid user role.");
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+
+    if (error.code === "auth/invalid-credential") {
+      toast.error("Invalid email or password.");
+    } else {
+      toast.error(error.message);
+    }
+  }
+};
 
   return (
     <section className="login-page">
@@ -58,6 +77,7 @@ export default function Login() {
               type="email"
               id="email"
               name="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
@@ -68,15 +88,20 @@ export default function Login() {
           <div className="input-group">
             <div className="label-row">
               <label htmlFor="password">Password</label>
-              <Link to="/forgot-password" className="forgot-link">
-                Forgot password?
-              </Link>
+              <button
+                type="button"
+                className="forgot-link"
+                onClick={() => handleForgotPassword(email)}
+              >
+                Forgot Password?
+              </button>
             </div>
 
             <input
               type="password"
               id="password"
               name="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"

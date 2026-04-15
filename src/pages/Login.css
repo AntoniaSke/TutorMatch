@@ -81,10 +81,12 @@
   color: #004aad;
   text-decoration: none;
   font-weight: 600;
+  border:none !important;
 }
 
 .forgot-link:hover {
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .login-form input {
@@ -181,6 +183,8 @@
 .signup-link.primary:hover {
   background: #e5efff;
 }
+
+
 
 @media (max-width: 768px) {
   .login-page {

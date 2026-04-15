@@ -7,7 +7,7 @@ import Home from './pages/Home.jsx';
 import { RegisterStudent, RegisterTutor } from './pages/Register.jsx';
 import { Toaster } from "react-hot-toast";
 import Login from './pages/Login.jsx';
-import { TutorDashboard, StudentDashboard } from './pages/Dashboard.jsx';
+import { TutorDashboard, StudentDashboard } from './pages/dashboard/Dashboard.jsx';
 import FindTutors from './pages/FindTutors.jsx';
 function App() {
  

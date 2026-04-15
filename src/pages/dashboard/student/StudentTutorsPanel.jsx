@@ -1,0 +1,246 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../../firebase";
+import defaultAvatar from "../../../assets/profile-avatar.png";
+import TutorProfileModal from "../../../components/TutorProfileModal";
+import LeaveReviewModal from "../../../components/LeaveReviewModal";
+import {
+  createReview,
+  getExistingReviewForSession,
+} from "../../../services/reviewService";
+import toast from "react-hot-toast";
+import "./StudentTutorsPanel.css";
+
+export default function StudentTutorsPanel({ requests, sessions }) {
+  const [tutorProfiles, setTutorProfiles] = useState({});
+  const [selectedTutor, setSelectedTutor] = useState(null);
+  const [isTutorModalOpen, setIsTutorModalOpen] = useState(false);
+
+  const [selectedReviewTarget, setSelectedReviewTarget] = useState(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
+  const acceptedRequests = useMemo(() => {
+    const accepted = requests.filter((request) => request.status === "accepted");
+
+    const map = new Map();
+
+    accepted.forEach((request) => {
+      if (!map.has(request.tutorId)) {
+        map.set(request.tutorId, {
+          ...request,
+          subjects: [request.subject],
+        });
+      } else {
+        const existing = map.get(request.tutorId);
+
+        if (!existing.subjects.includes(request.subject)) {
+          existing.subjects.push(request.subject);
+        }
+
+        map.set(request.tutorId, existing);
+      }
+    });
+
+    return Array.from(map.values());
+  }, [requests]);
+
+  useEffect(() => {
+    const fetchTutorProfiles = async () => {
+      try {
+        const profiles = {};
+
+        await Promise.all(
+          acceptedRequests.map(async (request) => {
+            if (!request.tutorId) return;
+
+            const tutorSnap = await getDoc(doc(db, "users", request.tutorId));
+            if (tutorSnap.exists()) {
+              profiles[request.tutorId] = tutorSnap.data();
+            }
+          })
+        );
+
+        setTutorProfiles(profiles);
+      } catch (error) {
+        console.error("Error fetching tutor profiles:", error);
+      }
+    };
+
+    if (acceptedRequests.length > 0) {
+      fetchTutorProfiles();
+    } else {
+      setTutorProfiles({});
+    }
+  }, [acceptedRequests]);
+
+  const getCompletedSessionForTutor = (tutorId) => {
+    return sessions.find(
+      (session) => session.tutorId === tutorId && session.status === "completed"
+    );
+  };
+
+  const handleSubmitReview = async ({ rating, comment }) => {
+    try {
+      const currentUser = auth.currentUser;
+
+      if (!currentUser || !selectedReviewTarget) {
+        toast.error("Unable to submit review.");
+        return;
+      }
+
+      const existingReviewSnapshot = await getExistingReviewForSession({
+        sessionId: selectedReviewTarget.sessionId,
+        studentId: currentUser.uid,
+      });
+
+      if (!existingReviewSnapshot.empty) {
+        toast.error("You have already reviewed this completed session.");
+        return;
+      }
+
+      await createReview({
+        tutorId: selectedReviewTarget.tutorId,
+        tutorName: selectedReviewTarget.tutorName,
+        studentId: currentUser.uid,
+        studentName: selectedReviewTarget.studentName,
+        sessionId: selectedReviewTarget.sessionId,
+        rating,
+        comment,
+      });
+
+      toast.success("Review submitted successfully!");
+      setIsReviewModalOpen(false);
+      setSelectedReviewTarget(null);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast.error("Failed to submit review.");
+    }
+  };
+
+  return (
+    <div className="student-tutors-panel">
+      <div className="student-tutors-header">
+        <h2>My Tutors</h2>
+        <p>These are the tutors who have accepted your requests.</p>
+      </div>
+
+      {acceptedRequests.length === 0 ? (
+        <p>No active tutors yet.</p>
+      ) : (
+        <div className="student-tutors-grid">
+          {acceptedRequests.map((request) => {
+            const tutorProfile = tutorProfiles[request.tutorId] || {};
+
+            const tutorPhoto =
+              request.tutorPhotoURL || tutorProfile.photoURL || defaultAvatar;
+
+            const tutorTeachingLevel =
+              request.tutorTeachingLevel ||
+              tutorProfile.teachingLevel ||
+              "Not specified";
+
+            const tutorAvailability =
+              request.tutorAvailability ||
+              tutorProfile.availability ||
+              "Not specified";
+
+            const tutorHourlyRate =
+              request.tutorHourlyRate || tutorProfile.hourlyRate || "-";
+
+            const completedSession = getCompletedSessionForTutor(request.tutorId);
+
+            return (
+              <div key={request.tutorId} className="student-tutor-card">
+                <div className="student-tutor-avatar-wrap">
+                  <img
+                    src={tutorPhoto}
+                    alt={request.tutorName}
+                    className="student-tutor-avatar"
+                  />
+                </div>
+
+                <div className="student-tutor-body">
+                  <h3>{request.tutorName}</h3>
+
+                  <p>
+                    <strong>Subjects:</strong>{" "}
+                    {Array.isArray(request.subjects) && request.subjects.length > 0
+                      ? request.subjects.join(", ")
+                      : request.subject}
+                  </p>
+
+                  <p>
+                    <strong>Level:</strong> {tutorTeachingLevel}
+                  </p>
+
+                  <p>
+                    <strong>Availability:</strong> {tutorAvailability}
+                  </p>
+
+                  <p>
+                    <strong>Rate:</strong> €{tutorHourlyRate}/hr
+                  </p>
+
+                  <button
+                    className="view-tutor-profile-button"
+                    onClick={() => {
+                      setSelectedTutor({
+                        name: request.tutorName,
+                        photoURL: tutorPhoto,
+                        bio: tutorProfile.bio || "",
+                        subjects: tutorProfile.subjects || request.subjects || [],
+                        teachingLevel: tutorTeachingLevel,
+                        availability: tutorAvailability,
+                        hourlyRate: tutorHourlyRate,
+                        rating: tutorProfile.rating || "",
+                      });
+                      setIsTutorModalOpen(true);
+                    }}
+                  >
+                    View Profile
+                  </button>
+
+                  {completedSession && (
+                    <button
+                      className="leave-review-button"
+                      onClick={() => {
+                        setSelectedReviewTarget({
+                          tutorId: request.tutorId,
+                          tutorName: request.tutorName,
+                          studentName: auth.currentUser?.displayName || "Student",
+                          sessionId: completedSession.id,
+                        });
+                        setIsReviewModalOpen(true);
+                      }}
+                    >
+                      Leave Review
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <TutorProfileModal
+        isOpen={isTutorModalOpen}
+        onClose={() => {
+          setIsTutorModalOpen(false);
+          setSelectedTutor(null);
+        }}
+        tutor={selectedTutor}
+      />
+
+      <LeaveReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => {
+          setIsReviewModalOpen(false);
+          setSelectedReviewTarget(null);
+        }}
+        tutorName={selectedReviewTarget?.tutorName || ""}
+        onSubmitReview={handleSubmitReview}
+      />
+    </div>
+  );
+}

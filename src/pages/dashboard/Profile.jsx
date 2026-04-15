@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { auth, db } from "../firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth } from "../../firebase";
+
+import { getUserProfile, updateUserProfile } from "../../services/userService";
 import { onAuthStateChanged } from "firebase/auth";
 import "./Profile.css";
-import defaultAvatar from "../assets/profile-avatar.png";
+import defaultAvatar from "../../assets/profile-avatar.png";
 import toast from "react-hot-toast";
 
 function ProfileTutor() {
@@ -49,14 +50,13 @@ function ProfileTutor() {
       if (!user) return;
 
       try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+        const userSnap = await getUserProfile(user.uid);
 
         if (userSnap.exists()) {
           const userData = userSnap.data();
 
           setName(userData.name || "");
-          setEmail(userData.email || user.email || "");
+          setEmail(user.email || userData.email || "");
           setBio(userData.bio || "");
           setTeachingLevel(userData.teachingLevel || "");
           setAvailability(userData.availability || "");
@@ -134,11 +134,10 @@ function ProfileTutor() {
         imageUrl = await uploadImageToCloudinary(imageFile);
       }
 
-      const userRef = doc(db, "users", user.uid);
 
-      await updateDoc(userRef, {
+
+      await updateUserProfile(user.uid, {
         name,
-        email,
         bio,
         teachingLevel,
         availability,
@@ -222,9 +221,8 @@ function ProfileTutor() {
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              readOnly
               placeholder="Enter your email address"
-              required
             />
           </div>
 
@@ -366,18 +364,17 @@ function ProfileStudent() {
       if (!user) return;
 
       try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+        const userSnap = await getUserProfile(user.uid);
 
         if (userSnap.exists()) {
           const userData = userSnap.data();
 
           setName(userData.name || "");
-          setEmail(userData.email || user.email || "");
+          setEmail(user.email || userData.email || "");
           setBio(userData.bio || "");
           setEducationLevel(userData.educationLevel || "");
           setAvailability(userData.availability || "");
-          
+
           setSelectedSubjects(userData.subjects || []);
           setSelectedLearningGoals(userData.learningGoals || []);
           setImage(userData.photoURL || null);
@@ -393,7 +390,7 @@ function ProfileStudent() {
     return () => unsubscribe();
   }, []);
 
-    const uploadImageToCloudinary = async (file) => {
+  const uploadImageToCloudinary = async (file) => {
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
@@ -426,7 +423,7 @@ function ProfileStudent() {
     return data.secure_url;
   };
 
-   const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
@@ -444,11 +441,9 @@ function ProfileStudent() {
         imageUrl = await uploadImageToCloudinary(imageFile);
       }
 
-      const userRef = doc(db, "users", user.uid);
 
-      await updateDoc(userRef, {
+      await updateUserProfile(user.uid, {
         name,
-        email,
         bio,
         educationLevel,
         availability,
@@ -525,7 +520,7 @@ function ProfileStudent() {
               placeholder="Enter your full name"
               required
             />
-        
+
           </div>
 
           <div className="input-group">
@@ -534,9 +529,8 @@ function ProfileStudent() {
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              readOnly
               placeholder="Enter your email address"
-              required
             />
           </div>
 
@@ -623,24 +617,24 @@ function ProfileStudent() {
                           ? prev.filter((item) => item !== goal)
                           : [...prev, goal]
                       );
-                    }}    
+                    }}
                   />
                   {goal}
                 </label>
               ))}
             </div>
           </div>
-     
+
         </fieldset>
-        
-         <button type="submit" className="save-button" disabled={loading}>
+
+        <button type="submit" className="save-button" disabled={loading}>
           {loading ? "Saving..." : "Save Profile"}
         </button>
       </form>
     </div>
-             
+
   );
-       
+
 }
 
 export { ProfileTutor, ProfileStudent };
