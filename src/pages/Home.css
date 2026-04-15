@@ -90,6 +90,9 @@
   align-items: end;
 }
 
+.home-label{
+  color: white !important;
+}
 .form-group {
   display: flex;
   flex-direction: column;

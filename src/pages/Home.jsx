@@ -3,6 +3,23 @@ import { useNavigate } from "react-router-dom";
 import "./Home.css";
 import teachingImg from "../assets/teaching.png";
 
+  const subjects = [
+    "Math",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "English",
+    "History",
+    "Computer Science",
+    "Programming",
+    "Statistics",
+    "Economics",
+    "Accounting",
+    "Business Studies",
+    "Geography",
+    "Philosophy",
+  ];
+
 function Home() {
   const navigate = useNavigate();
 
@@ -41,22 +58,23 @@ function Home() {
 
           <div className="search-form">
             <div className="form-group">
-              <label htmlFor="subject">Subject</label>
+              <label htmlFor="subject" className="home-label">Subject</label>
               <select
                 id="subject"
                 value={selectedSubject}
                 onChange={(e) => setSelectedSubject(e.target.value)}
               >
                 <option value="">Select a subject</option>
-                <option value="Math">Math</option>
-                <option value="Physics">Physics</option>
-                <option value="English">English</option>
-                <option value="History">History</option>
+                {subjects.map((subject) => (
+                  <option key={subject} value={subject}>
+                    {subject}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div className="form-group">
-              <label htmlFor="level">Level</label>
+              <label htmlFor="level" className="home-label">Level</label>
               <select
                 id="level"
                 value={selectedLevel}

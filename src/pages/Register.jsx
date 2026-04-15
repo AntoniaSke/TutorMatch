@@ -127,10 +127,13 @@ function RegisterStudent() {
               onChange={(e) => setGradeLevel(e.target.value)}
               required
             >
+             
               <option value="">Select grade level</option>
               <option value="elementary">Elementary</option>
+              <option value="middle-school">Middle School</option>
               <option value="highschool">High School</option>
-              <option value="college">College</option>
+              <option value="university">University</option>
+              <option value="adult-learners">Adult Learners</option>
             </select>
           </div>
 
