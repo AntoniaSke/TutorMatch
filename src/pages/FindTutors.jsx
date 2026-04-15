@@ -76,10 +76,14 @@ export default function FindTutors() {
                 const q = query(collection(db, "users"), where("role", "==", "tutor"));
                 const querySnapshot = await getDocs(q);
 
-                const tutorsList = querySnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
+                const currentUser = auth.currentUser;
+
+                const tutorsList = querySnapshot.docs
+                    .map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }))
+                    .filter((tutor) => tutor.id !== currentUser?.uid);
 
                 setTutors(tutorsList);
 
