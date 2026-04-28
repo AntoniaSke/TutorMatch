@@ -6,7 +6,7 @@ import TutorProfileModal from "../../../components/TutorProfileModal";
 import LeaveReviewModal from "../../../components/LeaveReviewModal";
 import {
   createReview,
-  getExistingReviewForSession,
+  getExistingReviewForTutor,
   subscribeToTutorReviews,
   calculateAverageRating,
 } from "../../../services/reviewService";
@@ -21,6 +21,7 @@ export default function StudentTutorsPanel({ requests, sessions }) {
   const [selectedReviewTarget, setSelectedReviewTarget] = useState(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedTutorReviews, setSelectedTutorReviews] = useState([]);
+  const [reviewedTutorIds, setReviewedTutorIds] = useState([]);
   const acceptedRequests = useMemo(() => {
     const accepted = requests.filter(
       (request) => request.status === "accepted",
@@ -49,32 +50,33 @@ export default function StudentTutorsPanel({ requests, sessions }) {
   }, [requests]);
 
   useEffect(() => {
-    const fetchTutorProfiles = async () => {
-      try {
-        const profiles = {};
+    const fetchReviewedTutors = async () => {
+      const currentUser = auth.currentUser;
 
-        await Promise.all(
-          acceptedRequests.map(async (request) => {
-            if (!request.tutorId) return;
-
-            const tutorSnap = await getDoc(doc(db, "users", request.tutorId));
-            if (tutorSnap.exists()) {
-              profiles[request.tutorId] = tutorSnap.data();
-            }
-          }),
-        );
-
-        setTutorProfiles(profiles);
-      } catch (error) {
-        console.error("Error fetching tutor profiles:", error);
+      if (!currentUser || acceptedRequests.length === 0) {
+        setReviewedTutorIds([]);
+        return;
       }
+
+      const reviewedIds = [];
+
+      await Promise.all(
+        acceptedRequests.map(async (request) => {
+          const snapshot = await getExistingReviewForTutor({
+            tutorId: request.tutorId,
+            studentId: currentUser.uid,
+          });
+
+          if (!snapshot.empty) {
+            reviewedIds.push(request.tutorId);
+          }
+        })
+      );
+
+      setReviewedTutorIds(reviewedIds);
     };
 
-    if (acceptedRequests.length > 0) {
-      fetchTutorProfiles();
-    } else {
-      setTutorProfiles({});
-    }
+    fetchReviewedTutors();
   }, [acceptedRequests]);
 
   useEffect(() => {
@@ -115,8 +117,8 @@ export default function StudentTutorsPanel({ requests, sessions }) {
         return;
       }
 
-      const existingReviewSnapshot = await getExistingReviewForSession({
-        sessionId: selectedReviewTarget.sessionId,
+      const existingReviewSnapshot = await getExistingReviewForTutor({
+        tutorId: selectedReviewTarget.tutorId,
         studentId: currentUser.uid,
       });
 
@@ -138,6 +140,7 @@ export default function StudentTutorsPanel({ requests, sessions }) {
       toast.success("Review submitted successfully!");
       setIsReviewModalOpen(false);
       setSelectedReviewTarget(null);
+      setReviewedTutorIds((prev) => [...prev, selectedReviewTarget.tutorId]);
     } catch (error) {
       console.error("Error submitting review:", error);
       toast.error("Failed to submit review.");
@@ -177,7 +180,8 @@ export default function StudentTutorsPanel({ requests, sessions }) {
             const completedSession = getCompletedSessionForTutor(
               request.tutorId,
             );
-
+            const hasReviewedTutor = reviewedTutorIds.includes(request.tutorId);
+            const canLeaveReview = completedSession && !hasReviewedTutor;
             return (
               <div key={request.tutorId} className="student-tutor-card">
                 <div className="student-tutor-avatar-wrap">
@@ -194,7 +198,7 @@ export default function StudentTutorsPanel({ requests, sessions }) {
                   <p>
                     <strong>Subjects:</strong>{" "}
                     {Array.isArray(request.subjects) &&
-                    request.subjects.length > 0
+                      request.subjects.length > 0
                       ? request.subjects.join(", ")
                       : request.subject}
                   </p>
@@ -231,7 +235,7 @@ export default function StudentTutorsPanel({ requests, sessions }) {
                     View Profile
                   </button>
 
-                  {completedSession && (
+                  {canLeaveReview && (
                     <button
                       className="leave-review-button"
                       onClick={() => {

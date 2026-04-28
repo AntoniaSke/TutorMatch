@@ -77,3 +77,13 @@ export const calculateAverageRating = (reviews = []) => {
 
   return Number((total / reviews.length).toFixed(1));
 };
+
+export const getExistingReviewForTutor = async ({ tutorId, studentId }) => {
+  const q = query(
+    collection(db, COLLECTIONS.REVIEWS),
+    where("tutorId", "==", tutorId),
+    where("studentId", "==", studentId)
+  );
+
+  return await getDocs(q);
+};
