@@ -23,6 +23,7 @@ import TutorStudentsPanel from "./tutor/TutorStudentsPanel";
 import TutorOverviewPanel from "./tutor/TutorOverviewPanel";
 import StudentOverviewPanel from "./student/StudentOverviewPanel";
 import TutorReviewsPanel from "./tutor/TutorReviewsPanel";
+import MessagesPanel from "./MessagesPanel";
 
 import {
   subscribeToTutorSessions,
@@ -31,6 +32,7 @@ import {
 } from "../../services/sessionService";
 
 import { subscribeToTutorReviews } from "../../services/reviewService";
+import { subscribeToUnreadMessagesCount } from "../../services/messageService";
 
 function TutorDashboard() {
   const [tutorName, setTutorName] = useState("");
@@ -40,10 +42,13 @@ function TutorDashboard() {
   const [reviews, setReviews] = useState([]);
   const tabs = ["Overview", "Requests", "Students", "Sessions", "Profile", "Messages", "Reviews"];
   const [sessions, setSessions] = useState([]);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
   useEffect(() => {
     let unsubscribeRequests = null;
     let unsubscribeSessions = null;
     let unsubscribeReviews = null;
+    let unsubscribeUnreadMessages = null;
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
 
@@ -94,6 +99,12 @@ function TutorDashboard() {
           (error) => {
             console.error("Error fetching tutor reviews:", error);
           }
+        );
+
+        unsubscribeUnreadMessages = subscribeToUnreadMessagesCount(
+          user.uid,
+          setUnreadMessagesCount,
+          (error) => console.error("Error fetching unread messages:", error)
         );
       } catch (error) {
         console.error("Error fetching tutor data:", error);
@@ -155,7 +166,11 @@ function TutorDashboard() {
             className={`dashboard-tab ${activeTab === tab ? "active" : ""}`}
             onClick={() => setActiveTab(tab)}
           >
+            
             {tab}
+            {tab === "Messages" && unreadMessagesCount > 0 && (
+              <span className="tab-badge">{unreadMessagesCount}</span>
+            )}
           </button>
         ))}
       </div>
@@ -189,10 +204,7 @@ function TutorDashboard() {
         {activeTab === "Profile" && <ProfileTutor />}
 
         {activeTab === "Messages" && (
-          <div className="messages-section">
-            <h2>Messages</h2>
-            <p>Here you will view your messages.</p>
-          </div>
+          <MessagesPanel userRole="tutor" currentUserName={tutorName} />
         )}
 
         {activeTab === "Reviews" && (
@@ -210,9 +222,12 @@ function StudentDashboard() {
 
   const tabs = ["Overview", "Requests", "My Tutors", "Sessions", "Profile", "Messages"];
   const [sessions, setSessions] = useState([]);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
   useEffect(() => {
     let unsubscribeRequests = null;
     let unsubscribeSessions = null;
+    let unsubscribeUnreadMessages = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
@@ -254,6 +269,11 @@ function StudentDashboard() {
             console.error("Error fetching student sessions:", error);
           }
         );
+        unsubscribeUnreadMessages = subscribeToUnreadMessagesCount(
+          user.uid,
+          setUnreadMessagesCount,
+          (error) => console.error("Error fetching unread messages:", error)
+        );
       } catch (error) {
         console.error("Error fetching student data:", error);
       }
@@ -263,6 +283,7 @@ function StudentDashboard() {
       unsubscribeAuth();
       if (unsubscribeRequests) unsubscribeRequests();
       if (unsubscribeSessions) unsubscribeSessions();
+      if (unsubscribeUnreadMessages) unsubscribeUnreadMessages();
     };
   }, []);
 
@@ -308,6 +329,9 @@ function StudentDashboard() {
             onClick={() => setActiveTab(tab)}
           >
             {tab}
+            {tab === "Messages" && unreadMessagesCount > 0 && (
+              <span className="tab-badge">{unreadMessagesCount}</span>
+            )}
           </button>
         ))}
       </div>
@@ -339,10 +363,7 @@ function StudentDashboard() {
       {activeTab === "Profile" && <ProfileStudent />}
 
       {activeTab === "Messages" && (
-        <div className="messages-section">
-          <h2>Messages</h2>
-          <p>Here you will view your messages.</p>
-        </div>
+        <MessagesPanel userRole="student" currentUserName={studentName} />
       )}
 
     </div>
