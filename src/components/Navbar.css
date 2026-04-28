@@ -5,21 +5,12 @@
   width: 100%;
   height: 88px;
 
- 
-  background: linear-gradient(
-    to bottom,
-    rgba(15, 23, 42, 0.15),
-    rgba(15, 23, 42, 0.55)
-  );
+  background: rgba(10, 18, 28, 0.34);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
 
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-
-
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: none;
   z-index: 1000;
 }
 
@@ -67,18 +58,19 @@
 
 .nav-link {
   text-decoration: none;
-  color: #243247;
+  color: rgba(255, 255, 255, 0.92);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   padding: 10px 14px;
   border-radius: 10px;
   transition: all 0.2s ease;
 }
 
 .nav-link:hover {
-  color: #004aad;
-  background-color: rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
 }
+
 
 .navbar-actions {
   display: flex;
@@ -162,32 +154,33 @@
 .logout-btn {
   border: none;
   background: transparent;
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   padding: 10px 12px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 .dashboard-link {
-  border: none;
   background: #004aad;
-  color: #f3f7ff;
+  color: white;
   font-size: 0.95rem;
-  font-weight: 500;
-  padding: 10px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.6s ease;
-  text-decoration:none
-}
-.logout-btn:hover,
-.dashboard-link:hover {
-  background: #f3f7ff;
-  color: #004aad;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 12px;
+  text-decoration: none;
 }
 
+.dashboard-link:hover {
+  background: #003b8a;
+  color: white;
+}
+
+
+.logout-btn:hover {
+  color: #004aad;
+  background: #f3f7ff;
+}
 .mobile-menu-btn {
   display: none;
   border: none;
