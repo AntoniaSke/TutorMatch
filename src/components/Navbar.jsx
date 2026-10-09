@@ -1,6 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import logo from "../assets/logo.png";
 import "./Navbar.css";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -68,7 +67,8 @@ const navigate = useNavigate();
       <div className="navbar-container">
         <div className="navbar-left">
           <Link to="/" className="navbar-logo">
-            <img src={logo} alt="TutorMatch logo" />
+            <img src="/favicon.svg" alt="" />
+            <span className="navbar-wordmark">Tutor<span>Match</span></span>
           </Link>
 
           <ul className="navbar-links">
