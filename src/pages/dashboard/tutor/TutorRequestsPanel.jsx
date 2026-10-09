@@ -49,7 +49,7 @@ export default function TutorRequestsPanel({
 
   const handleCreateSession = async ({ date, time, notes }) => {
     try {
-      if (!selectedRequest) return;
+      if (!selectedRequest) return false;
 
      await createSession({
   requestId: selectedRequest.id,
@@ -70,9 +70,11 @@ export default function TutorRequestsPanel({
       toast.success("Session created successfully!");
       setIsScheduleModalOpen(false);
       setSelectedRequest(null);
+      return true;
     } catch (error) {
       console.error("Error creating session:", error);
       toast.error("Failed to create session.");
+      return false;
     }
   };
 

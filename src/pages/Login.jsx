@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { loginWithEmail, sendResetPasswordEmail } from "../services/authService";
 import { getUserProfile } from "../services/userService";
 export default function Login() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -29,7 +30,8 @@ export default function Login() {
 
  const handleLoginSubmit = async (e) => {
   e.preventDefault();
-
+  if (isSubmitting) return;
+  setIsSubmitting(true);
   try {
     const userCredential = await loginWithEmail({ email, password });
     const user = userCredential.user;
@@ -58,6 +60,8 @@ export default function Login() {
     } else {
       toast.error(error.message);
     }
+  } finally {
+    setIsSubmitting(false);
   }
 };
 
@@ -109,8 +113,8 @@ export default function Login() {
             />
           </div>
 
-          <button type="submit" className="login-button">
-            Log in
+          <button type="submit" className="login-button" disabled={isSubmitting}>
+            {isSubmitting ? "Logging in…" : "Log in"}
           </button>
         </form>
 

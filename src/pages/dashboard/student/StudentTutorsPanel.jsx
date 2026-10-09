@@ -50,6 +50,19 @@ export default function StudentTutorsPanel({ requests, sessions }) {
   }, [requests]);
 
   useEffect(() => {
+    let active = true;
+    async function loadProfiles() {
+      const profiles = await Promise.allSettled(acceptedRequests.map(async (request) => {
+        const profile = await getDoc(doc(db, "users", request.tutorId));
+        return [request.tutorId, profile.exists() ? profile.data() : {}];
+      }));
+      if (active) setTutorProfiles(Object.fromEntries(profiles.filter(item => item.status === "fulfilled").map(item => item.value)));
+    }
+    loadProfiles();
+    return () => { active = false; };
+  }, [acceptedRequests]);
+
+  useEffect(() => {
     const fetchReviewedTutors = async () => {
       const currentUser = auth.currentUser;
 
@@ -92,8 +105,6 @@ export default function StudentTutorsPanel({ requests, sessions }) {
           console.error("Error fetching tutor reviews:", error);
         },
       );
-    } else {
-      setSelectedTutorReviews([]);
     }
 
     return () => {

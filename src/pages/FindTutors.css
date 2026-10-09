@@ -232,8 +232,8 @@ padding-bottom:20px;
     color: #475569;
     font-size: 1rem;
     text-align: center;
-   
-   
+
+
 }
 .view-profile-button {
   border: none;
@@ -534,3 +534,8 @@ padding-bottom:20px;
     width: 100%;
   }
 }
+.tutor-card { display: flex; flex-direction: column; min-width: 0; }
+.tutor-card .view-profile-button { margin-top: auto; }
+.tutor-card h4 { overflow-wrap: anywhere; }
+.tutor-card .thumbnail { object-fit: cover; }
+.no-tutors-found { grid-column: 1 / -1; text-align: center; padding: 32px; color: #52637b; }

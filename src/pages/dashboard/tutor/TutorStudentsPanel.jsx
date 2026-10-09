@@ -62,16 +62,12 @@ export default function TutorStudentsPanel({ requests }) {
       }
     };
 
-    if (uniqueStudents.length > 0) {
-      fetchStudentProfiles();
-    } else {
-      setStudentProfiles({});
-    }
+    fetchStudentProfiles();
   }, [uniqueStudents]);
 
   const handleCreateSession = async ({ date, time, notes }) => {
     try {
-      if (!selectedStudentRequest) return;
+      if (!selectedStudentRequest) return false;
 
       const liveStudentProfile =
         studentProfiles[selectedStudentRequest.studentId] || {};
@@ -96,9 +92,11 @@ export default function TutorStudentsPanel({ requests }) {
       toast.success("Session created successfully!");
       setIsScheduleModalOpen(false);
       setSelectedStudentRequest(null);
+      return true;
     } catch (error) {
       console.error("Error creating session:", error);
       toast.error("Failed to create session.");
+      return false;
     }
   };
 

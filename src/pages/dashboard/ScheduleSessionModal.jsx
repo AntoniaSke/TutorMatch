@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./ScheduleSessionModal.css";
+import toast from "react-hot-toast";
 
 export default function ScheduleSessionModal({
   isOpen,
@@ -7,6 +8,7 @@ export default function ScheduleSessionModal({
   request,
   onCreateSession,
 }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -15,13 +17,23 @@ export default function ScheduleSessionModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await onCreateSession({ date, time, notes });
-    setDate("");
-    setTime("");
-    setNotes("");
+    if (isSubmitting) return;
+    if (new Date(`${date}T${time}`).getTime() <= Date.now()) {
+      toast.error("Please choose a future date and time.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const created = await onCreateSession({ date, time, notes });
+      if (created === false) return;
+      setDate(""); setTime(""); setNotes("");
+    } catch {
+      toast.error("Could not create the session. Please try again.");
+    } finally { setIsSubmitting(false); }
   };
 
   const handleClose = () => {
+    if (isSubmitting) return;
     setDate("");
     setTime("");
     setNotes("");
@@ -31,10 +43,10 @@ export default function ScheduleSessionModal({
   return (
     <div className="schedule-modal-overlay" onClick={handleClose}>
       <div
-        className="schedule-modal"
+        className="schedule-modal" role="dialog" aria-modal="true" aria-label="Schedule session"
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="schedule-modal-close" onClick={handleClose}>
+        <button aria-label="Close scheduling" className="schedule-modal-close" disabled={isSubmitting} onClick={handleClose}>
           ×
         </button>
 
@@ -50,6 +62,7 @@ export default function ScheduleSessionModal({
             <input
               id="session-date"
               type="date"
+              min={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`}
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
@@ -78,8 +91,8 @@ export default function ScheduleSessionModal({
             />
           </div>
 
-          <button type="submit" className="schedule-submit-button">
-            Create Session
+          <button type="submit" className="schedule-submit-button" disabled={isSubmitting}>
+            {isSubmitting ? "Creating…" : "Create Session"}
           </button>
         </form>
       </div>

@@ -38,7 +38,6 @@ function TutorDashboard() {
   const [tutorName, setTutorName] = useState("");
   const [activeTab, setActiveTab] = useState("Overview");
   const [requests, setRequests] = useState([]);
-  const [currentTutorId, setCurrentTutorId] = useState("");
   const [reviews, setReviews] = useState([]);
   const tabs = ["Overview", "Requests", "Students", "Sessions", "Profile", "Messages", "Reviews"];
   const [sessions, setSessions] = useState([]);
@@ -53,7 +52,6 @@ function TutorDashboard() {
       if (!user) return;
 
       try {
-        setCurrentTutorId(user.uid);
 
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
@@ -116,6 +114,7 @@ function TutorDashboard() {
       if (unsubscribeRequests) unsubscribeRequests();
       if (unsubscribeSessions) unsubscribeSessions();
       if (unsubscribeReviews) unsubscribeReviews();
+      if (unsubscribeUnreadMessages) unsubscribeUnreadMessages();
     };
   }, []);
 
@@ -130,9 +129,6 @@ function TutorDashboard() {
     }
   };
 
-  const pendingRequestsCount = requests.filter(
-    (request) => request.status === "pending"
-  ).length;
 
   const handleCancelSession = async (sessionId) => {
     try {
@@ -166,7 +162,7 @@ function TutorDashboard() {
             className={`dashboard-tab ${activeTab === tab ? "active" : ""}`}
             onClick={() => setActiveTab(tab)}
           >
-            
+
             {tab}
             {tab === "Messages" && unreadMessagesCount > 0 && (
               <span className="tab-badge">{unreadMessagesCount}</span>
@@ -287,13 +283,7 @@ function StudentDashboard() {
     };
   }, []);
 
-  const pendingRequestsCount = requests.filter(
-    (request) => request.status === "pending"
-  ).length;
 
-  const acceptedTutorsCount = requests.filter(
-    (request) => request.status === "accepted"
-  ).length;
 
 
   const handleAcceptSession = async (sessionId) => {

@@ -31,3 +31,6 @@ dist
 # admin secrets
 admin-scripts/serviceAccountKey.json
 admin-scripts/*.json
+# Local Firebase credentials and generated demo login secrets
+**/*serviceAccount*.json
+**/demo-credentials*.json
