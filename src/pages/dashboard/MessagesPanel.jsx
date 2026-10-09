@@ -8,6 +8,7 @@ import {
     subscribeToConversationMessages,
 } from "../../services/messageService";
 import "./MessagesPanel.css";
+import toast from "react-hot-toast";
 
 function MessagesPanel({ userRole, currentUserName }) {
     const currentUser = auth.currentUser;
@@ -20,6 +21,8 @@ function MessagesPanel({ userRole, currentUserName }) {
     const [loadingContacts, setLoadingContacts] = useState(true);
 
     const messagesEndRef = useRef(null);
+    const selectionRevision = useRef(0);
+    const [isSending, setIsSending] = useState(false);
 
     useEffect(() => {
         if (!currentUser || !userRole) return;
@@ -41,10 +44,7 @@ function MessagesPanel({ userRole, currentUserName }) {
     }, [currentUser, userRole]);
 
     useEffect(() => {
-        if (!selectedConversation) {
-            setMessages([]);
-            return;
-        }
+        if (!selectedConversation) return;
 
         const unsubscribe = subscribeToConversationMessages(
             selectedConversation.id,
@@ -66,8 +66,11 @@ function MessagesPanel({ userRole, currentUserName }) {
     const handleSelectContact = async (contact) => {
         if (!currentUser) return;
 
+        const revision = ++selectionRevision.current;
         setSelectedContact(contact);
+        setSelectedConversation(null);
         setMessages([]);
+        setMessageText("");
 
         try {
             const conversation = await getOrCreateConversation({
@@ -77,18 +80,21 @@ function MessagesPanel({ userRole, currentUserName }) {
                 contactName: contact.name,
             });
 
+            if (revision !== selectionRevision.current) return;
             setSelectedConversation(conversation);
             await markConversationAsRead(conversation.id, currentUser.uid);
         } catch (error) {
             console.error("Error opening conversation:", error);
+            if (revision === selectionRevision.current) toast.error("Could not open this conversation. Please try again.");
         }
     };
 
     const handleSendMessage = async (event) => {
         event.preventDefault();
 
-        if (!messageText.trim() || !selectedConversation || !currentUser) return;
-
+        if (isSending || !messageText.trim() || !selectedConversation || !currentUser) return;
+        const revision = selectionRevision.current;
+        setIsSending(true);
         try {
             await sendMessage({
   conversationId: selectedConversation.id,
@@ -97,10 +103,11 @@ function MessagesPanel({ userRole, currentUserName }) {
   text: messageText,
 });
 
-            setMessageText("");
+            if (revision === selectionRevision.current) setMessageText("");
         } catch (error) {
             console.error("Error sending message:", error);
-        }
+            toast.error("Could not send your message. Please try again.");
+        } finally { setIsSending(false); }
     };
 
     const contactsTitle = userRole === "tutor" ? "Your Students" : "Your Tutors";
@@ -221,7 +228,7 @@ function MessagesPanel({ userRole, currentUserName }) {
                                     onChange={(event) => setMessageText(event.target.value)}
                                 />
 
-                                <button type="submit">Send</button>
+                                <button disabled={isSending || !selectedConversation} type="submit">Send</button>
                             </form>
                         </>
                     )}

@@ -5,8 +5,6 @@ import {
     getDocs,
     query,
     where,
-    addDoc,
-    serverTimestamp,
     getDoc,
     doc,
 } from "firebase/firestore";
@@ -17,7 +15,6 @@ import {
     createRequest,
     getExistingPendingRequest,
 } from "../services/requestService";
-import TutorProfileModal from "../components/TutorProfileModal";
 import {
     subscribeToTutorReviews,
     calculateAverageRating,
@@ -50,6 +47,8 @@ export default function FindTutors() {
         "Adult Learners",
     ];
 
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState("");
     const [tutors, setTutors] = useState([]);
     const [selectedTutor, setSelectedTutor] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,63 +71,40 @@ export default function FindTutors() {
     const [selectedTutorReviews, setSelectedTutorReviews] = useState([]);
     const [tutorRatings, setTutorRatings] = useState({});
     useEffect(() => {
+        let active = true;
         const fetchTutors = async () => {
+            setIsLoading(true);
+            setLoadError("");
             try {
+                await auth.authStateReady();
                 const q = query(collection(db, "users"), where("role", "==", "tutor"));
-                const querySnapshot = await getDocs(q);
-
-                const currentUser = auth.currentUser;
-
-                const tutorsList = querySnapshot.docs
-                    .map((doc) => ({
-                        id: doc.id,
-                        ...doc.data(),
-                    }))
-                    .filter((tutor) => tutor.id !== currentUser?.uid);
-
+                const snapshot = await getDocs(q);
+                const tutorsList = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }))
+                    .filter((tutor) => tutor.id !== auth.currentUser?.uid);
+                if (!active) return;
                 setTutors(tutorsList);
-
-                const ratingsMap = {};
-
-                for (const tutor of tutorsList) {
-                    const q = query(
-                        collection(db, "reviews"),
-                        where("tutorId", "==", tutor.id)
-                    );
-
-                    const snapshot = await getDocs(q);
-
-                    const reviews = snapshot.docs.map(doc => doc.data());
-
-                    ratingsMap[tutor.id] = calculateAverageRating(reviews);
-                }
-
-                setTutorRatings(ratingsMap);
-
-                let results = tutorsList;
-
-                if (initialSubject) {
-                    results = results.filter(
-                        (tutor) =>
-                            Array.isArray(tutor.subjects) &&
-                            tutor.subjects.includes(initialSubject)
-                    );
-                }
-
-                if (initialLevel) {
-                    results = results.filter(
-                        (tutor) => tutor.teachingLevel === initialLevel
-                    );
-                }
-
-                setFilteredTutors(results);
+                setSelectedSubjects(initialSubject ? [initialSubject] : []);
+                setSelectedLevel(initialLevel);
+                setFilteredTutors(tutorsList.filter((tutor) =>
+                    (!initialSubject || tutor.subjects?.includes(initialSubject)) &&
+                    (!initialLevel || tutor.teachingLevel === initialLevel)
+                ));
+                setIsLoading(false);
+                // A failed rating lookup must not hide otherwise available tutors.
+                const ratings = await Promise.allSettled(tutorsList.map(async (tutor) => {
+                    const reviews = await getDocs(query(collection(db, "reviews"), where("tutorId", "==", tutor.id)));
+                    return [tutor.id, calculateAverageRating(reviews.docs.map((item) => item.data()))];
+                }));
+                if (active) setTutorRatings(Object.fromEntries(ratings.filter((item) => item.status === "fulfilled").map((item) => item.value)));
             } catch (error) {
                 console.error("Error fetching tutors:", error);
-                toast.error("Failed to load tutors.");
+                if (active) setLoadError("We couldn’t load tutors. Please refresh and try again.");
+            } finally {
+                if (active) setIsLoading(false);
             }
         };
-
         fetchTutors();
+        return () => { active = false; };
     }, [initialSubject, initialLevel]);
 
     useEffect(() => {
@@ -144,8 +120,6 @@ export default function FindTutors() {
                     console.error("Error fetching tutor reviews:", error);
                 }
             );
-        } else {
-            setSelectedTutorReviews([]);
         }
 
         return () => {
@@ -197,6 +171,7 @@ export default function FindTutors() {
     };
 
     const handleSendRequest = async () => {
+        if (isSendingRequest) return;
         try {
             const currentUser = auth.currentUser;
 
@@ -231,6 +206,10 @@ export default function FindTutors() {
             }
 
             const studentData = studentSnap.data();
+            if (studentData.role !== "student") {
+                toast.error("Only student accounts can send lesson requests.");
+                return;
+            }
 
             const existingRequestsSnapshot = await getExistingPendingRequest({
                 studentId: currentUser.uid,
@@ -289,6 +268,9 @@ export default function FindTutors() {
                             <button
                                 type="button"
                                 className="multiselect-button"
+                                aria-label="Select subjects"
+                                aria-expanded={isSubjectOpen}
+                                onKeyDown={(event) => { if (event.key === "Escape") setIsSubjectOpen(false); }}
                                 onClick={() => setIsSubjectOpen((prev) => !prev)}
                             >
                                 {selectedSubjects.length > 0
@@ -335,22 +317,24 @@ export default function FindTutors() {
                         </div>
                     </div>
 
-                    <button className="search-button" onClick={handleSearch}>
+                    <button className="search-button" onClick={() => { handleSearch(); setIsSubjectOpen(false); }} disabled={isLoading}>
                         Search Tutors
                     </button>
                 </div>
             </div>
 
             <div className="tutor-container">
-                <h3>Featured Tutors</h3>
+                <h3>Find your tutor</h3>
                 <p>Here you will see a list of tutors based on your search.</p>
 
                 <div className="tutors-grid">
-                    {filteredTutors.length > 0 ? (
+                    {isLoading ? <p className="no-tutors-found" role="status">Loading tutors…</p> : loadError ? <p className="no-tutors-found" role="alert">{loadError}</p> : filteredTutors.length > 0 ? (
                         filteredTutors.map((tutor) => (
                             <div key={tutor.id} className="tutor-card">
                                 <img
                                     src={tutor.photoURL || defaultAvatar}
+                                    onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = defaultAvatar; }}
+                                    loading="lazy"
                                     alt={tutor.name}
                                     className="thumbnail"
                                 />
@@ -384,14 +368,14 @@ export default function FindTutors() {
 
                 {isModalOpen && selectedTutor && (
                     <div className="modal-overlay" onClick={handleCloseModal}>
-                        <div className="tutor-modal" onClick={(e) => e.stopPropagation()}>
-                            <button className="close-modal" onClick={handleCloseModal}>
+                        <div className="tutor-modal" role="dialog" aria-modal="true" aria-label="Tutor profile" onClick={(e) => e.stopPropagation()}>
+                            <button aria-label="Close tutor profile" className="close-modal" onClick={handleCloseModal}>
                                 ×
                             </button>
 
                             <div className="modal-header">
                                 <img
-                                    src={selectedTutor.photoURL || "/default-profile.png"}
+                                    src={selectedTutor.photoURL || defaultAvatar}
                                     alt={selectedTutor.name}
                                     className="modal-thumbnail"
                                 />

@@ -346,3 +346,27 @@ TutorMatch simulates a real-world tutoring platform and demonstrates:
 
 ---
 
+
+
+## Demo users
+
+The existing admin script now seeds synthetic Firebase Authentication accounts and matching `users` profiles. Default: **20 tutors and 10 students**, with varied subjects, levels, availability and hourly rates. Emails use the reserved `.invalid` domain; these are demo profiles, not verified tutors.
+
+Preview without credentials or database writes:
+
+```sh
+npm run seed:users
+npm run seed:users -- --tutors 30 --students 15
+```
+
+To create them, install the admin dependencies and configure a Firebase service account through Application Default Credentials. Keep the key outside the repository:
+
+```sh
+npm ci --prefix admin-scripts
+export GOOGLE_APPLICATION_CREDENTIALS=/absolute/private/path/firebase-service-account.json
+npm run seed:users -- --apply --project turormatch
+```
+
+`--apply` and an explicit `--project` are required for writes. Stable demo IDs make repeated runs skip existing demo accounts. The script refuses to overwrite non-demo users, uses create-only profile writes, and can resume after a partial failure. It does not modify real users, reset existing passwords, delete data, or generate fake reviews. New passwords are random and stored only in the ignored `admin-scripts/demo-credentials.local.json` with private file permissions. Protect this file and never commit it. For another Firebase project, replace the project ID in the command.
+
+The repository does not contain Firebase admin credentials or deployed Firestore security rules. UI role checks improve navigation but do not replace server-side rules; actual seeding and authenticated workflow verification require project access.

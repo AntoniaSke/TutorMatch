@@ -1,7 +1,7 @@
 h1{
     font-size:50px;
     color: #004aad;
-    
+
 
 }
 .dashboard-container {
@@ -10,15 +10,15 @@ h1{
   padding-right: 20px;
     background:
     linear-gradient(rgba(241, 245, 252, 0.92), rgba(241, 245, 252, 0.92)),
-    url("../assets/teaching.png") center/cover no-repeat;
- min-height: 100vh; 
+    url("../../assets/teaching.png") center/cover no-repeat;
+ min-height: 100vh;
 }
 .dashboard-tabs {
   margin-top: 30px;
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  
+
 }
 
 .dashboard-tab {
@@ -109,7 +109,7 @@ h1{
 }
 
 @media(max-width: 600px) {
- 
+
   h1{
     font-size: 32px;
   }

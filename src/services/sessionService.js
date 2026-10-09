@@ -25,6 +25,10 @@ export const createSession = async ({
   time,
   notes,
 }) => {
+  const scheduledAt = new Date(`${date}T${time}`).getTime();
+  if (!Number.isFinite(scheduledAt) || scheduledAt <= Date.now()) {
+    throw new Error("Sessions must be scheduled for a future date and time.");
+  }
   let finalStudentPhotoURL = studentPhotoURL || "";
   let finalTutorPhotoURL = tutorPhotoURL || "";
 

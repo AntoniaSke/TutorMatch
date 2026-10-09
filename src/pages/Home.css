@@ -60,13 +60,7 @@
   font-weight: 700;
 }
 
-.home-content h1 {
-  font-size: clamp(2.4rem, 5vw, 4.5rem);
-  line-height: 1.1;
-  font-weight: 800;
-  margin-bottom: 18px;
- 
-}
+
 
 .home-content p {
   max-width: 760px;
@@ -191,3 +185,13 @@
     height: 48px;
   }
 }
+.home-how { max-width: 1140px; padding: 80px 24px; margin: auto; text-align: center; scroll-margin-top: 100px; }
+.home-section-label { color: #004aad; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; }
+.home-how h2 { margin: 14px 0 32px; font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.home-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: left; }
+.home-steps article { background: white; border: 1px solid #dbe5f3; border-radius: 20px; padding: 28px; box-shadow: 0 12px 36px #004aad08; }
+.home-steps article > span { color: #004aad; font-size: 1.2rem; font-weight: 800; }
+.home-steps h3 { margin: 16px 0 12px; }
+.home-steps p { color: #52637b; line-height: 1.7; }
+.home-how-link { display: inline-block; margin-top: 32px; color: #004aad; font-weight: 700; text-decoration: none; }
+@media (max-width: 700px) { .home-steps { grid-template-columns: 1fr; } .home-how { padding: 48px 20px; } }

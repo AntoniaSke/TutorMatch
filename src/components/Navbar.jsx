@@ -83,9 +83,9 @@ const navigate = useNavigate();
               </NavLink>
             </li>
             <li>
-              <NavLink to="/how-it-works" className="nav-link">
+              <Link to="/#how-it-works" className="nav-link">
                 How it works
-              </NavLink>
+              </Link>
             </li>
           </ul>
         </div>
@@ -114,6 +114,7 @@ const navigate = useNavigate();
               >
                 <button
                   className="signup-btn"
+                  aria-expanded={isDropdownOpen}
                   type="button"
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
                 >
@@ -137,6 +138,9 @@ const navigate = useNavigate();
 
         <button
           className="mobile-menu-btn"
+          aria-label={isMobileMenuOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-navigation"
           type="button"
           onClick={() => setIsMobileMenuOpen((prev) => !prev)}
         >
@@ -145,7 +149,7 @@ const navigate = useNavigate();
       </div>
 
       {isMobileMenuOpen && (
-        <div className="mobile-menu">
+        <div id="mobile-navigation" className="mobile-menu">
           <NavLink
             to="/"
             className="mobile-link"
@@ -162,13 +166,13 @@ const navigate = useNavigate();
             Find Tutors
           </NavLink>
 
-          <NavLink
-            to="/how-it-works"
+          <Link
+            to="/#how-it-works"
             className="mobile-link"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             How it works
-          </NavLink>
+          </Link>
 
           {loggedIn ? (
             <>
@@ -200,6 +204,7 @@ const navigate = useNavigate();
 
               <button
                 className="mobile-signup-toggle"
+                aria-expanded={isMobileSignupOpen}
                 type="button"
                 onClick={() => setIsMobileSignupOpen((prev) => !prev)}
               >
